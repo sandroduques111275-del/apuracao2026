@@ -190,7 +190,7 @@ function render(d){
       <div class="t3">${f2(p.pst_soma)}% das seções apuradas · ${f2(pv)}% dos votos válidos · vantagem de ${fi(dif)} votos${p.falta_votos>0?`, maior que todos os ~${fi(p.falta_votos)} votos que ainda faltam — ${esc(nome[perd])} não alcança mais`:" · apuração concluída"}.</div>`;
     if(df.style.display!=="block"){ df.style.display="block"; if(!window._avisouDef){ window._avisouDef=1; document.title="✔ "+nome[venc]+" eleito · Apuração"; df.scrollIntoView({behavior:"smooth"}); } }
     $("tend").textContent=`${nome[venc]} eleito (matematicamente)`;
-  } else { df.style.display="none"; }
+  } else { df.style.display="none"; window._avisouDef=0; document.title="Apuração 2º Turno 2026"; }
   if(p.definido){}
   else if(p.confianca==="disputa aberta"){ $("tend").textContent=`Disputa aberta · ${lider} à frente`; }
   else { $("tend").textContent=`${lider} deve vencer`; }
@@ -222,8 +222,8 @@ function render(d){
     $("relogio").textContent=d.demo.hora;
     $("progSim").style.width=d.demo.pct_tempo+"%";
     const bs=$("btnSim"), est=d.demo.estado;
-    bs.textContent = est==="parado" ? "▶ Iniciar simulação" : est==="fim" ? "↺ Simular de novo" : "Simulando…";
-    bs.classList.toggle("rodando", est==="rodando");
+    bs.textContent = est==="parado" ? "▶ Iniciar simulação" : est==="fim" ? "✔ Fim · voltando ao início…" : "Simulando…";
+    bs.classList.toggle("rodando", est!=="parado");
   } else ctl.style.display="none";
   $("probA").textContent=semVotos?"–":pct(p.prob_a); $("probB").textContent=semVotos?"–":pct(1-p.prob_a);
   $("nA").textContent=nome[A.n]; $("nB").textContent=nome[B.n];
@@ -276,7 +276,7 @@ async function atualizar(){
   catch(e){ $("meta").textContent="sem conexão com o servidor local (o servidor.py está rodando?)"; }
 }
 $("btnSim").onclick=async()=>{
-  if(ultimo?.demo?.estado==="rodando") return;
+  if(ultimo?.demo?.estado!=="parado") return;
   await fetch("/api/controle?acao=iniciar",{cache:"no-store"}); setTimeout(atualizar,200);
 };
 atualizar(); setInterval(atualizar,1000);

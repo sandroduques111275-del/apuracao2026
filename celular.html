@@ -161,7 +161,7 @@ let ultimo=null, aba="reg";
 $("seg").querySelectorAll("button").forEach(b=>b.onclick=()=>{aba=b.dataset.t;
   $("seg").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b)); if(ultimo) lista(ultimo);});
 $("btnSim").onclick=async()=>{
-  if(ultimo?.demo?.estado==="rodando") return;
+  if(ultimo?.demo?.estado!=="parado") return;
   await fetch("/api/controle?acao=iniciar",{cache:"no-store"}); setTimeout(atualizar,200);
 };
 
@@ -185,8 +185,8 @@ function render(d){
     $("rel").textContent=d.demo.hora;
     $("progSim").style.width=d.demo.pct_tempo+"%";
     const bs=$("btnSim"), est=d.demo.estado;
-    bs.textContent = est==="parado" ? "▶ Iniciar simulação" : est==="fim" ? "↺ Simular de novo" : "Simulando…";
-    bs.classList.toggle("rodando", est==="rodando");
+    bs.textContent = est==="parado" ? "▶ Iniciar simulação" : est==="fim" ? "✔ Fim · voltando ao início…" : "Simulando…";
+    bs.classList.toggle("rodando", est!=="parado");
   } else $("ctl").style.display="none";
 
   // definido
@@ -196,7 +196,7 @@ function render(d){
     df.innerHTML=`<div class="t1">Matematicamente definido</div><div class="t2">${esc(nome[v])} eleito</div>
       <div class="t3">${f2(p.pst_soma)}% apurado · vantagem de ${fi(Math.abs(p.apurado.a-p.apurado.b))} votos</div>`;
     document.title="✔ "+nome[v]+" eleito";
-  } else df.style.display="none";
+  } else { df.style.display="none"; document.title="Apuração 2026"; }
 
   // vantagem
   const vt=$("vant");

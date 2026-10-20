@@ -370,6 +370,7 @@ def secoes_do_cs(cs):
     return tempos, total
 
 
+ESPERA_FIM_SIM = 15  # segundos mostrando o resultado final antes de zerar a tela
 VEL_SIM = 480.0   # velocidade fixa da simulação: 8 min de apuração por segundo (noite toda em ~45 s)
 
 
@@ -690,6 +691,12 @@ class Coletor(threading.Thread):
 
     def ciclo_demo(self):
         d = self.demo
+        if d.terminou_em and time.time() - d.terminou_em > ESPERA_FIM_SIM:
+            # acabou: mostra o resultado final por alguns segundos e volta à tela inicial (17:00, zerada)
+            d.reiniciar()
+            d.pausado = True
+            with self.lock:
+                self.estado["historico"] = []
         unidades, t = d.unidades()
         pres = projetar(unidades, d.prior, CANDIDATOS_PRES)
         pres["oficial_br"] = {"pst": pres["pst_soma"], "hora": d.hora(),
