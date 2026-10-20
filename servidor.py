@@ -379,6 +379,7 @@ class Demo:
 
     def __init__(self, minutos, semente=None, prior_real=None, aleatoria=False, linha=None):
         rnd = random.Random(semente)
+        self.aleatoria = aleatoria
         self.real = bool(prior_real)
         self.nomes = {"13": "CANDIDATO 13 (fictício)", "22": "CANDIDATO 22 (fictício)"}
         if self.real:  # nomes reais vindos do arquivo do TSE
@@ -444,7 +445,7 @@ class Demo:
         if not self.linha and self.real:
             # nova rodada = novo resultado sorteado (mantém a velocidade escolhida)
             vel = self.vel
-            self.__init__(self.fim / 360, prior_real=self.prior, aleatoria=True)
+            self.__init__(self.fim / 360, prior_real=self.prior, aleatoria=self.aleatoria)
             self.vel = vel
 
     def hora(self):
@@ -727,9 +728,11 @@ class Coletor(threading.Thread):
             real = self.prior_pres if len(self.prior_pres) >= 27 else None
             if not real:
                 print("  sem acesso ao 1º turno — usando números fictícios.")
-            # simulação com dados FICTÍCIOS: base no 1º turno + variação sorteada a cada rodada
-            self.demo = Demo(self.args.demo_minutos, prior_real=real, aleatoria=True)
-            print("  simulação com dados fictícios (resultado sorteado a cada rodada)")
+            # simulação: votos de cada estado = 1º turno (Flávio × Lula); só a ORDEM da apuração é simulada.
+            # --demo-aleatoria sorteia uma variação nacional de até ±3 p.p.
+            self.demo = Demo(self.args.demo_minutos, prior_real=real, aleatoria=self.args.demo_aleatoria)
+            print("  simulação: resultado de cada estado igual ao 1º turno" if real and not self.args.demo_aleatoria
+                  else "  simulação com resultado sorteado")
         else:
             print("Lendo configuração e base do 1º turno no TSE…")
             self.descobrir_codigos()

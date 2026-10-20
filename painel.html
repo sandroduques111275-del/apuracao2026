@@ -229,7 +229,7 @@ function render(d){
     $("relogio").textContent=d.demo.hora+(d.demo.pausado?" ⏸":"");
     $("ordem").innerHTML=(d.demo.ordem==="real"
       ? "ordem real do 1º turno (horário de chegada de cada seção)"
-      : "dados fictícios · Sul/Sudeste apuram primeiro, Norte/Nordeste depois")+` · <span class="prog" style="display:inline-block;vertical-align:middle"><i style="width:${d.demo.pct_tempo}%"></i></span>`;
+      : "votos de cada estado = 1º turno · ordem de apuração simulada (Sul/Sudeste primeiro)")+` · <span class="prog" style="display:inline-block;vertical-align:middle"><i style="width:${d.demo.pct_tempo}%"></i></span>`;
     $("bPausa").textContent = d.demo.pausado ? "▶ Continuar" : "Pausar";
     ctl.querySelectorAll("button").forEach(b=>{
       const on = b.dataset.a==="pausar" ? d.demo.pausado : (!d.demo.pausado && Number(b.dataset.v)===Math.round(d.demo.vel));
