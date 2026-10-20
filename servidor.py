@@ -819,7 +819,20 @@ def criar_handler(coletor):
                 acao = q.get("acao", [None])[0]
                 r = coletor.controle(vel=float(vel) if vel not in (None, "") else None, acao=acao)
                 self.enviar(json.dumps(r, ensure_ascii=False), "application/json; charset=utf-8")
-            elif self.path in ("/", "/index.html", "/painel.html"):
+            elif self.path.startswith("/celular"):
+                with open(os.path.join(AQUI, "celular.html"), "rb") as f:
+                    self.enviar(f.read(), "text/html; charset=utf-8")
+            elif self.path.startswith("/icone.png"):
+                with open(os.path.join(AQUI, "icone.png"), "rb") as f:
+                    self.enviar(f.read(), "image/png")
+            elif self.path.split("?")[0] in ("/", "/index.html", "/painel.html"):
+                ua = (self.headers.get("User-Agent") or "").lower()
+                celular = any(k in ua for k in ("iphone", "android", "mobile")) and "ipad" not in ua
+                if celular and "completo=1" not in self.path:
+                    self.send_response(302)
+                    self.send_header("Location", "/celular")
+                    self.end_headers()
+                    return
                 with open(os.path.join(AQUI, "painel.html"), "rb") as f:
                     self.enviar(f.read(), "text/html; charset=utf-8")
             else:

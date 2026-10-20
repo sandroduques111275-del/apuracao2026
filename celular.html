@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Apuração">
+<meta name="theme-color" content="#0f1115">
+<link rel="apple-touch-icon" href="/icone.png">
+<title>Apuração 2026</title>
+<style>
+  :root{
+    --bg:#f2f2f7; --card:#fff; --ink:#111; --mut:#8a8a8e; --line:#e5e5ea;
+    --a:#1f5fd1; --b:#d32f2f; --ok:#1e8e3e; --warn:#c77700;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#000; --card:#1c1c1e; --ink:#f2f2f7; --mut:#8e8e93; --line:#2c2c2e;
+           --a:#4c8dff; --b:#ff5a52; --ok:#34c759; --warn:#ff9f0a; }
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--bg);color:var(--ink)}
+  body{font:16px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+       padding:calc(env(safe-area-inset-top) + 8px) 14px calc(env(safe-area-inset-bottom) + 24px);
+       -webkit-text-size-adjust:100%}
+  .num{font-variant-numeric:tabular-nums}
+  .topo{display:flex;align-items:center;gap:8px;margin:4px 2px 12px}
+  .topo h1{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:0;flex:1}
+  .selo{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:4px 8px;border-radius:99px;border:1.5px solid currentColor}
+  .selo.oficial{color:var(--ok)} .selo.demo,.selo.teste{color:var(--warn)}
+  .pulso{width:8px;height:8px;border-radius:50%;background:var(--ok);animation:p 1.6s infinite}
+  @keyframes p{0%{opacity:1}50%{opacity:.25}100%{opacity:1}}
+  .card{background:var(--card);border-radius:18px;padding:16px;margin-bottom:12px}
+  .lbl{font-size:12px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+  .aviso{background:var(--card);border-left:4px solid var(--warn);border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:14px}
+
+  .definido{display:none;border-radius:18px;padding:18px 16px;margin-bottom:12px;color:#fff;text-align:center}
+  .definido .t1{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.9}
+  .definido .t2{font-size:28px;font-weight:800;letter-spacing:-.02em;margin:4px 0;line-height:1.1}
+  .definido .t3{font-size:13px;opacity:.92}
+
+  .vant{border-radius:18px;padding:16px;margin-bottom:12px;color:#fff}
+  .vant .r{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.9}
+  .vant .n{font-size:40px;font-weight:800;letter-spacing:-.03em;line-height:1.05;margin:4px 0 2px}
+  .vant .q{font-size:15px;opacity:.95}
+
+  .cand{display:flex;align-items:center;gap:12px;padding:10px 0}
+  .cand+.cand{border-top:1px solid var(--line)}
+  .cand .cor{width:6px;align-self:stretch;border-radius:3px}
+  .cand .nm{font-weight:700;font-size:17px}
+  .cand .sub{font-size:13px;color:var(--mut)}
+  .cand .pc{margin-left:auto;text-align:right}
+  .cand .pc b{font-size:26px;font-weight:800;letter-spacing:-.02em}
+  .barra{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--line);margin:10px 0 4px;position:relative}
+  .barra i{display:block;height:100%;transition:width .6s}
+  .barra .meio{position:absolute;left:50%;top:-2px;bottom:-2px;width:2px;background:var(--ink);opacity:.5}
+  .secoes{display:flex;justify-content:space-between;font-size:13px;color:var(--mut)}
+  .prog{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:6px}
+  .prog i{display:block;height:100%;background:var(--ok);transition:width .6s}
+
+  .grade{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .mini .v{font-size:22px;font-weight:800;letter-spacing:-.02em}
+  .mini .t{font-size:12px;color:var(--mut)}
+  .tend{font-size:20px;font-weight:800;letter-spacing:-.01em;line-height:1.2}
+  .conf{font-size:13px;color:var(--mut);margin-top:2px}
+
+  .seg{display:flex;background:var(--line);border-radius:10px;padding:2px;margin-bottom:10px}
+  .seg button{flex:1;border:0;background:transparent;color:var(--ink);font:600 14px -apple-system,system-ui,sans-serif;padding:8px 4px;border-radius:8px}
+  .seg button.on{background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+  .lista .it{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+  .lista .it:first-child{border-top:0}
+  .lista .uf{font-weight:700;width:34px}
+  .lista .nm{flex:1;min-width:0}
+  .lista .nm small{display:block;color:var(--mut);font-size:12px}
+  .lista .mb{width:72px;height:6px;border-radius:3px;background:var(--line);overflow:hidden;display:flex}
+  .lista .pa{width:58px;text-align:right;font-weight:700}
+
+  .ctl{display:none}
+  .ctl .rel{font-size:26px;font-weight:800;letter-spacing:-.02em}
+  .vel{display:flex;gap:6px;overflow-x:auto;margin-top:10px;padding-bottom:2px;scrollbar-width:none}
+  .vel::-webkit-scrollbar{display:none}
+  .vel button{flex:0 0 auto;border:0;background:var(--line);color:var(--ink);font:700 14px -apple-system,system-ui,sans-serif;padding:9px 13px;border-radius:99px}
+  .vel button.on{background:var(--ink);color:var(--bg)}
+  svg text{fill:var(--mut);font:10px -apple-system,system-ui,sans-serif}
+  .rod{font-size:12px;color:var(--mut);text-align:center;margin-top:16px;line-height:1.5}
+  .rod a{color:var(--mut)}
+</style>
+</head>
+<body>
+  <div class="topo">
+    <h1>Apuração 2º Turno</h1>
+    <span class="pulso" id="pulso"></span>
+    <span class="selo" id="selo">…</span>
+  </div>
+
+  <div id="avisos"></div>
+  <div class="definido" id="definido"></div>
+
+  <div class="card ctl" id="ctl">
+    <div style="display:flex;align-items:baseline;justify-content:space-between">
+      <span class="rel num" id="rel">17:00</span>
+      <span style="font-size:12px;color:var(--mut)">simulação</span>
+    </div>
+    <div class="vel">
+      <button data-a="pausar" id="bPausa">⏸ Pausar</button>
+      <button data-v="60">60×</button><button data-v="300">300×</button><button data-v="900">900×</button>
+      <button data-v="1800">1800×</button><button data-v="3600">3600×</button><button data-v="7200">7200×</button>
+      <button data-a="reiniciar">↺ Reiniciar</button>
+    </div>
+  </div>
+
+  <div id="conteudo" style="display:none">
+    <div class="vant" id="vant"></div>
+
+    <div class="card">
+      <div class="lbl">Apurado · Presidente</div>
+      <div id="cands"></div>
+      <div class="barra" id="barAp"></div>
+      <div class="secoes num"><span id="pst">–</span><span id="hora"></span></div>
+      <div class="prog"><i id="progPst" style="width:0"></i></div>
+    </div>
+
+    <div class="card">
+      <div class="lbl">Direção da eleição</div>
+      <div class="tend" id="tend">–</div>
+      <div class="conf" id="conf"></div>
+      <div class="barra" id="barProj" style="height:12px"></div>
+      <div class="secoes num"><span id="projA"></span><span id="me"></span><span id="projB"></span></div>
+      <div class="grade" style="margin-top:14px">
+        <div class="mini"><div class="v num" id="chA">–</div><div class="t" id="chAn">chance</div></div>
+        <div class="mini" style="text-align:right"><div class="v num" id="chB">–</div><div class="t" id="chBn">chance</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="lbl">Evolução da noite</div>
+      <svg id="graf" viewBox="0 0 340 150" width="100%"></svg>
+    </div>
+
+    <div class="card">
+      <div class="seg" id="seg">
+        <button data-t="reg" class="on">Regiões</button>
+        <button data-t="uf">Estados</button>
+        <button data-t="gov">Governadores</button>
+      </div>
+      <div class="lista" id="lista"></div>
+    </div>
+  </div>
+
+  <div class="rod">
+    Fonte: TSE (resultados.tse.jus.br). Projeção e chance são estimativas, não resultado oficial.<br>
+    <a href="/?completo=1">Ver versão completa</a>
+  </div>
+
+<script>
+const $=id=>document.getElementById(id);
+const nf=new Intl.NumberFormat("pt-BR");
+const f1=x=>x==null||!isFinite(x)?"–":x.toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1});
+const f2=x=>x==null||!isFinite(x)?"–":x.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
+const fi=x=>x==null||!isFinite(x)?"–":nf.format(Math.round(x));
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const cap=s=>String(s||"").toLowerCase().replace(/(^|\s)\S/g,m=>m.toUpperCase());
+let ultimo=null, aba="reg";
+
+$("seg").querySelectorAll("button").forEach(b=>b.onclick=()=>{aba=b.dataset.t;
+  $("seg").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b)); if(ultimo) lista(ultimo);});
+$("ctl").querySelectorAll("button").forEach(b=>b.onclick=async()=>{
+  const q=b.dataset.a?(b.dataset.a==="pausar"&&ultimo?.demo?.pausado?"acao=continuar":"acao="+b.dataset.a):"vel="+b.dataset.v;
+  await fetch("/api/controle?"+q,{cache:"no-store"}); setTimeout(atualizar,300);
+});
+
+function render(d){
+  ultimo=d;
+  const m={demo:["demo","Simulação"],"teste-1turno":["teste","Teste"],oficial:["oficial","Ao vivo · TSE"]}[d.modo]||["","…"];
+  $("selo").className="selo "+m[0]; $("selo").textContent=m[1];
+  const av=[];
+  if(d.status_erro) av.push("Falha na última leitura do TSE — mostrando a anterior.");
+  if(d.status!=="ok"){ av.push(esc(d.mensagem||"Aguardando dados…")); $("avisos").innerHTML=av.map(a=>`<div class="aviso">${a}</div>`).join(""); return; }
+  $("avisos").innerHTML=av.map(a=>`<div class="aviso">${a}</div>`).join("");
+  $("conteudo").style.display="";
+
+  const p=d.presidente,[A,B]=p.candidatos,nome={[A.n]:cap(A.nome),[B.n]:cap(B.nome)};
+  const cor={[A.n]:"var(--a)",[B.n]:"var(--b)"};
+  const tem=p.apurado.a+p.apurado.b>0;
+  const pa=p.apurado.pct_a;
+
+  // simulação
+  if(d.demo){ $("ctl").style.display="block";
+    $("rel").textContent=d.demo.hora+(d.demo.pausado?"  ⏸":"");
+    $("bPausa").textContent=d.demo.pausado?"▶ Continuar":"⏸ Pausar";
+    $("ctl").querySelectorAll("button[data-v]").forEach(b=>b.classList.toggle("on",!d.demo.pausado&&Number(b.dataset.v)===Math.round(d.demo.vel)));
+  } else $("ctl").style.display="none";
+
+  // definido
+  const df=$("definido");
+  if(p.definido){ const v=p.definido;
+    df.style.display="block"; df.style.background=cor[v];
+    df.innerHTML=`<div class="t1">Matematicamente definido</div><div class="t2">${esc(nome[v])} eleito</div>
+      <div class="t3">${f2(p.pst_soma)}% apurado · vantagem de ${fi(Math.abs(p.apurado.a-p.apurado.b))} votos</div>`;
+    document.title="✔ "+nome[v]+" eleito";
+  } else df.style.display="none";
+
+  // vantagem
+  const vt=$("vant");
+  if(!tem){ vt.style.background="var(--card)"; vt.style.color="var(--ink)";
+    vt.innerHTML=`<div class="r" style="color:var(--mut)">Aguardando</div><div style="font-size:20px;font-weight:800;margin-top:4px">Apuração ainda não começou</div><div class="q" style="color:var(--mut);margin-top:4px">Começa após as 17h de domingo (horário de Brasília).</div>`;
+  } else { const L=p.apurado.a>=p.apurado.b?A:B, S=L===A?B:A;
+    vt.style.background=cor[L.n]; vt.style.color="#fff";
+    vt.innerHTML=`<div class="r">Vantagem na apuração</div><div class="n num">+${fi(Math.abs(p.apurado.a-p.apurado.b))}</div>
+      <div class="q">votos de <b>${esc(nome[L.n])}</b> sobre ${esc(nome[S.n])} · ${f2(Math.abs(2*pa-100))} p.p.</div>`; }
+
+  // candidatos
+  $("cands").innerHTML=[A,B].map(c=>{const v=c===A?p.apurado.a:p.apurado.b, pc=tem?(c===A?pa:100-pa):null;
+    return `<div class="cand"><span class="cor" style="background:${cor[c.n]}"></span>
+      <div><div class="nm">${esc(nome[c.n])}</div><div class="sub num">${c.n} · ${fi(v)} votos</div></div>
+      <div class="pc"><b class="num" style="color:${cor[c.n]}">${tem?f2(pc)+"%":"–"}</b></div></div>`}).join("");
+  $("barAp").innerHTML=tem?`<i style="width:${pa}%;background:var(--a)"></i><i style="width:${100-pa}%;background:var(--b)"></i><span class="meio"></span>`:"";
+  $("pst").textContent=f2(p.pst_soma)+"% das seções apuradas";
+  $("hora").textContent=d.demo?"":"atualizado "+(d.atualizado||"");
+  $("progPst").style.width=p.pst_soma+"%";
+
+  // direção
+  const lid=nome[p.lider];
+  if(!tem){ $("tend").textContent="Sem votos apurados ainda"; $("tend").style.color="var(--ink)";
+    $("conf").textContent="A barra abaixo é só a base do 1º turno."; }
+  else { $("tend").textContent=p.definido?`${nome[p.definido]} eleito`:(p.confianca==="disputa aberta"?`Disputa aberta · ${lid} à frente`:`${lid} deve vencer`);
+    $("tend").style.color=cor[p.definido||p.lider]; $("conf").textContent="Confiança: "+p.confianca; }
+  const pj=p.projecao.pct_a;
+  $("barProj").innerHTML=`<i style="width:${pj}%;background:var(--a)"></i><i style="width:${100-pj}%;background:var(--b)"></i><span class="meio"></span>`;
+  $("projA").textContent=f2(pj)+"%"; $("projB").textContent=f2(100-pj)+"%";
+  $("me").textContent="projeção ± "+f2(p.projecao.margem_erro_pp);
+  const pc=x=>!tem?"–":(p.definido||p.pst_soma>=100)?Math.round(100*x)+"%":x>.99?">99%":x<.01?"<1%":Math.round(100*x)+"%";
+  $("chA").textContent=pc(p.prob_a); $("chA").style.color="var(--a)"; $("chAn").textContent="chance · "+nome[A.n];
+  $("chB").textContent=pc(1-p.prob_a); $("chB").style.color="var(--b)"; $("chBn").textContent="chance · "+nome[B.n];
+
+  grafico(d.historico||[]);
+  lista(d);
+}
+
+function lista(d){
+  const p=d.presidente,[A,B]=p.candidatos, el=$("lista");
+  const linha=(sig,nm,sub,pct,ap)=>`<div class="it">${sig?`<span class="uf">${sig}</span>`:""}
+    <span class="nm">${nm}<small>${sub}</small></span>
+    <span class="mb">${pct==null?"":`<i style="width:${pct}%;background:var(--a)"></i><i style="width:${100-pct}%;background:var(--b)"></i>`}</span>
+    <span class="pa num" style="color:${pct==null?"var(--mut)":pct>=50?"var(--a)":"var(--b)"}">${pct==null?"–":f1(pct>=50?pct:100-pct)+"%"}</span></div>`;
+  const quem=pct=>pct==null?"":(pct>=50?cap(A.nome):cap(B.nome))+" na frente";
+  if(aba==="reg") el.innerHTML=p.regioes.map(r=>linha("",r.regiao,`${f1(r.pst)}% apurado · ${quem(r.pct_a)}`,r.pct_a)).join("");
+  else if(aba==="uf") el.innerHTML=[...p.ufs].sort((x,y)=>y.eleitorado-x.eleitorado).map(u=>linha(u.uf.toUpperCase(),esc(u.nome),`${f1(u.pst)}% apurado · ${quem(u.pct_a)}`,u.pct_a)).join("");
+  else { const g=d.governadores||[];
+    el.innerHTML=g.length?g.map(x=>{const[a,b]=x.candidatos,ap=x.apurado.pct_a,l=ap==null?null:(ap>=50?a:b);
+      return `<div class="it"><span class="uf">${x.uf.toUpperCase()}</span><span class="nm">${l?esc(cap(l.nome)):"–"}<small>${x.definido?"eleito · ":""}${f1(x.pst_soma)}% apurado · ${esc(cap(a.nome))} × ${esc(cap(b.nome))}</small></span>
+        <span class="pa num">${ap==null?"–":f1(Math.max(ap,100-ap))+"%"}</span></div>`}).join("")
+      :`<div style="color:var(--mut);font-size:14px;padding:6px 0">Sem dados de governador ainda (AC, AM, DF, ES, RJ, RN e TO).</div>`; }
+}
+
+function grafico(h){
+  h=h.filter(e=>e.pst>0&&e.apurado_a!=null);
+  const W=340,H=150,L=28,R=6,T=6,Bm=18,s=$("graf");
+  if(!h.length){s.innerHTML=`<text x="${W/2}" y="${H/2}" text-anchor="middle">aguardando a apuração…</text>`;return;}
+  const v=h.flatMap(e=>[e.apurado_a,100-e.apurado_a]);
+  const lo=Math.floor(Math.min(...v,50)-2), hi=Math.ceil(Math.max(...v,50)+2);
+  const X=p=>L+p/100*(W-L-R), Y=x=>T+(1-(x-lo)/(hi-lo))*(H-T-Bm);
+  let o=""; const passo=hi-lo>12?5:2;
+  for(let y=Math.ceil(lo/passo)*passo;y<=hi;y+=passo) o+=`<line x1="${L}" x2="${W-R}" y1="${Y(y)}" y2="${Y(y)}" stroke="currentColor" opacity="${y===50?.45:.12}"/><text x="${L-4}" y="${Y(y)+3}" text-anchor="end">${y}</text>`;
+  for(let p=0;p<=100;p+=25) o+=`<text x="${X(p)}" y="${H-4}" text-anchor="middle">${p}%</text>`;
+  const ln=(f,c)=>`<polyline fill="none" stroke="${c}" stroke-width="2.5" stroke-linejoin="round" points="${h.map(e=>X(e.pst)+","+Y(f(e))).join(" ")}"/>`;
+  s.innerHTML=`<g style="color:var(--mut)">${o}</g>`+ln(e=>e.apurado_a,"var(--a)")+ln(e=>100-e.apurado_a,"var(--b)");
+}
+
+async function atualizar(){
+  try{ const r=await fetch("/api/estado",{cache:"no-store"}); render(await r.json()); $("pulso").style.background="var(--ok)"; }
+  catch(e){ $("pulso").style.background="var(--b)"; }
+}
+atualizar(); setInterval(atualizar,2000);
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden) atualizar(); });
+</script>
+</body>
+</html>
