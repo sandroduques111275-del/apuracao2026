@@ -370,6 +370,9 @@ def secoes_do_cs(cs):
     return tempos, total
 
 
+VEL_SIM = 480.0   # velocidade fixa da simulação: 8 min de apuração por segundo (noite toda em ~45 s)
+
+
 class Demo:
     """Simulação da noite de apuração.
     - Com a "linha do tempo" do 1º turno: cada município entra na contagem exatamente no ritmo
@@ -422,13 +425,12 @@ class Demo:
         self.ufs_linha = {m[0] for m in self.linha} if self.linha else set()
         if self.linha:
             self.fim = max(1, max((m[5][-1] for m in self.linha if m[5]), default=1))
-            self.vel = 900.0                         # 15 minutos de apuração real por segundo
         else:
             self.fim = 6 * 3600                       # 17h às 23h de apuração simulada
-            self.vel = self.fim / max(1.0, minutos * 60)
+        self.vel = VEL_SIM
         self.v = 0.0
         self._ult = time.time()
-        self.pausado = False
+        self.pausado = True                           # espera alguém tocar em "Iniciar simulação"
         self.terminou_em = None
 
     # ---- relógio da simulação ----
@@ -501,7 +503,8 @@ class Demo:
         return round(100 * a / (a + b), 2) if a + b else None
 
     def info(self):
-        return {"vel": self.vel, "pausado": self.pausado, "hora": self.hora(),
+        estado = "fim" if self.v >= self.fim else ("parado" if self.v == 0 and self.pausado else "rodando")
+        return {"estado": estado, "vel": self.vel, "pausado": self.pausado, "hora": self.hora(),
                 "pct_tempo": round(100 * self.v / self.fim, 1),
                 "ordem": "real" if self.linha else "modelo",
                 "ufs_reais": len(self.ufs_linha)}
@@ -687,10 +690,6 @@ class Coletor(threading.Thread):
 
     def ciclo_demo(self):
         d = self.demo
-        if d.terminou_em and not d.pausado and time.time() - d.terminou_em > 120:
-            d.reiniciar()  # 2 min depois de terminar, recomeça (para quem abrir o link depois)
-            with self.lock:
-                self.estado["historico"] = []
         unidades, t = d.unidades()
         pres = projetar(unidades, d.prior, CANDIDATOS_PRES)
         pres["oficial_br"] = {"pst": pres["pst_soma"], "hora": d.hora(),
@@ -714,6 +713,11 @@ class Coletor(threading.Thread):
             d.pausado = False
             if d.vel == 0:
                 d.vel = 900.0
+        elif acao == "iniciar":
+            d.reiniciar()
+            d.vel, d.pausado = VEL_SIM, False
+            with self.lock:
+                self.estado["historico"] = []
         elif acao == "reiniciar":
             d.reiniciar()
             with self.lock:

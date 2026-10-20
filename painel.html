@@ -66,13 +66,14 @@
   .vant .r{font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;opacity:.9;width:100%}
   .vant .n{font:800 38px/1.05 var(--mono);letter-spacing:-.03em}
   .vant .q{font-size:15px;opacity:.95}
-  .ctl{display:none;align-items:center;flex-wrap:wrap;gap:8px 10px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13.5px}
-  .ctl .relogio{font:700 20px var(--mono);margin-right:6px}
-  .ctl button{font:600 13px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:6px 10px;border-radius:6px;cursor:pointer}
-  .ctl button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-  .ctl .sep{flex:1}
-  .ctl .prog{width:120px;height:6px;background:var(--line);border-radius:3px;overflow:hidden}
-  .ctl .prog i{display:block;height:100%;background:var(--mut)}
+  .ctl{display:none;align-items:center;flex-wrap:wrap;gap:12px 18px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-bottom:14px}
+  .ctl .relogio{font:700 26px var(--mono)}
+  .ctl .info{flex:1;min-width:200px;color:var(--mut);font-size:13.5px}
+  .ctl .prog{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:6px}
+  .ctl .prog i{display:block;height:100%;background:var(--ok);transition:width .4s}
+  .btnSim{font:800 17px system-ui,-apple-system,sans-serif;border:0;border-radius:12px;padding:15px 28px;cursor:pointer;color:#fff;background:var(--ok);box-shadow:0 4px 14px rgba(46,125,50,.35);transition:transform .1s}
+  .btnSim:active{transform:scale(.97)}
+  .btnSim.rodando{background:var(--line);color:var(--mut);box-shadow:none;cursor:default}
   .tabs button{font:600 13px system-ui;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:7px 12px;border-radius:6px;cursor:pointer}
   .tabs button.on{border-color:var(--ink)}
   .sec{display:none}.sec.on{display:block}
@@ -89,17 +90,9 @@
   <div class="definido" id="definido"></div>
   <div class="ctl" id="ctl">
     <span class="relogio" id="relogio">17:00</span>
-    <span id="ordem" style="color:var(--mut)"></span>
-    <span class="sep"></span>
-    <span style="color:var(--mut)">Velocidade:</span>
-    <button data-a="pausar" id="bPausa">Pausar</button>
-    <button data-v="60">60×</button>
-    <button data-v="300">300×</button>
-    <button data-v="900">900×</button>
-    <button data-v="1800">1.800×</button>
-    <button data-v="3600">3.600×</button>
-    <button data-v="7200">7.200×</button>
-    <button data-a="reiniciar" title="Recomeçar do zero">↺ Reiniciar</button>
+    <div class="info"><span id="ordem">Simulação · resultado de cada estado igual ao 1º turno</span>
+      <div class="prog"><i id="progSim" style="width:0"></i></div></div>
+    <button class="btnSim" id="btnSim">▶ Iniciar simulação</button>
   </div>
 
   <div id="conteudo" style="display:none">
@@ -206,7 +199,7 @@ function render(d){
     (p.real_demo_a!=null?` · <i>resultado real da simulação: ${esc(A.nome)} ${f2(p.real_demo_a)}%</i>`:"");
   if(!(p.apurado.a+p.apurado.b>0)){
     $("tend").textContent="Apuração ainda não começou"; $("tend").style.color="var(--ink)";
-    $("conf").innerHTML=(d.modo==="demo"?"Simulação iniciando.":"Conexão com o TSE ok.")+" A barra abaixo é só a <b>base do 1º turno</b> (os dois finalistas), não é tendência do 2º turno. A apuração começa após as 17h de domingo.";
+    $("conf").innerHTML=(d.modo==="demo"?"Clique em <b>▶ Iniciar simulação</b> lá em cima.":"Conexão com o TSE ok.")+" A barra abaixo é só a <b>base do 1º turno</b> (os dois finalistas), não é tendência do 2º turno. A apuração começa após as 17h de domingo.";
   }
   barra($("barProj"),p.projecao.pct_a);
   $("mePrj").innerHTML=`<span><span class="pill" style="background:var(--a)"></span><b>${esc(nome[A.n])}</b> (${A.n})</span><span>margem ± ${f2(p.projecao.margem_erro_pp)} p.p.</span><span><b>${esc(nome[B.n])}</b> (${B.n})<span class="pill" style="background:var(--b);margin:0 0 0 6px"></span></span>`;
@@ -226,15 +219,11 @@ function render(d){
   const ctl=$("ctl");
   if(d.demo){
     ctl.style.display="flex";
-    $("relogio").textContent=d.demo.hora+(d.demo.pausado?" ⏸":"");
-    $("ordem").innerHTML=(d.demo.ordem==="real"
-      ? "ordem real do 1º turno (horário de chegada de cada seção)"
-      : "votos de cada estado = 1º turno · ordem de apuração simulada (Sul/Sudeste primeiro)")+` · <span class="prog" style="display:inline-block;vertical-align:middle"><i style="width:${d.demo.pct_tempo}%"></i></span>`;
-    $("bPausa").textContent = d.demo.pausado ? "▶ Continuar" : "Pausar";
-    ctl.querySelectorAll("button").forEach(b=>{
-      const on = b.dataset.a==="pausar" ? d.demo.pausado : (!d.demo.pausado && Number(b.dataset.v)===Math.round(d.demo.vel));
-      b.classList.toggle("on",!!on);
-    });
+    $("relogio").textContent=d.demo.hora;
+    $("progSim").style.width=d.demo.pct_tempo+"%";
+    const bs=$("btnSim"), est=d.demo.estado;
+    bs.textContent = est==="parado" ? "▶ Iniciar simulação" : est==="fim" ? "↺ Simular de novo" : "Simulando…";
+    bs.classList.toggle("rodando", est==="rodando");
   } else ctl.style.display="none";
   $("probA").textContent=semVotos?"–":pct(p.prob_a); $("probB").textContent=semVotos?"–":pct(1-p.prob_a);
   $("nA").textContent=nome[A.n]; $("nB").textContent=nome[B.n];
@@ -286,10 +275,10 @@ async function atualizar(){
   try{ const r=await fetch("/api/estado",{cache:"no-store"}); ultimo=await r.json(); render(ultimo); }
   catch(e){ $("meta").textContent="sem conexão com o servidor local (o servidor.py está rodando?)"; }
 }
-document.querySelectorAll("#ctl button").forEach(b=>b.onclick=async()=>{
-  const q = b.dataset.a ? (b.dataset.a==="pausar" && ultimo?.demo?.pausado ? "acao=continuar" : "acao="+b.dataset.a) : "vel="+b.dataset.v;
-  await fetch("/api/controle?"+q,{cache:"no-store"}); setTimeout(atualizar,400);
-});
+$("btnSim").onclick=async()=>{
+  if(ultimo?.demo?.estado==="rodando") return;
+  await fetch("/api/controle?acao=iniciar",{cache:"no-store"}); setTimeout(atualizar,200);
+};
 atualizar(); setInterval(atualizar,1000);
 </script>
 </body>
