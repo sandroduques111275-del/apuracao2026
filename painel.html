@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apuração 2º Turno 2026</title>
+<style>
+  :root{
+    --bg:#f6f5f2; --card:#ffffff; --ink:#1b1d21; --mut:#6b7078; --line:#e3e1dc;
+    --a:#1f5fd1; --b:#d32f2f; --ok:#2e7d32; --warn:#b26a00;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#111317; --card:#1a1d23; --ink:#e9e7e2; --mut:#9aa0a8; --line:#2b2f37;
+           --a:#5b8def; --b:#ef5350; --ok:#66bb6a; --warn:#f0a43a; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:1100px;margin:0 auto;padding:20px 16px 48px}
+  header{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 16px;margin-bottom:16px}
+  h1{font-size:20px;margin:0;font-weight:700;letter-spacing:-.01em}
+  .badge{font:600 11px/1 var(--mono);text-transform:uppercase;letter-spacing:.06em;padding:5px 8px;border-radius:4px;border:1px solid var(--line);color:var(--mut)}
+  .badge.oficial{color:var(--ok);border-color:var(--ok)}
+  .badge.demo,.badge.teste{color:var(--warn);border-color:var(--warn)}
+  .meta{color:var(--mut);font-size:13px;margin-left:auto}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px}
+  .grid{display:grid;gap:14px}
+  .g2{grid-template-columns:1.25fr 1fr}
+  @media (max-width:820px){.g2{grid-template-columns:1fr}}
+  .lbl{font:600 11px/1.2 var(--mono);text-transform:uppercase;letter-spacing:.07em;color:var(--mut);margin-bottom:8px}
+  .tend{font-size:30px;font-weight:750;letter-spacing:-.02em;line-height:1.1}
+  .conf{margin-top:6px;font-size:14px;color:var(--mut)}
+  .conf b{color:var(--ink)}
+  .bar{display:flex;height:34px;border-radius:6px;overflow:hidden;margin:14px 0 6px;position:relative;background:var(--line)}
+  .bar div{display:flex;align-items:center;font:700 14px var(--mono);color:#fff;padding:0 10px;white-space:nowrap;transition:width .6s}
+  .bar .a{background:var(--a)} .bar .b{background:var(--b);justify-content:flex-end}
+  .bar .meio{position:absolute;left:50%;top:-3px;bottom:-3px;width:2px;background:var(--ink);opacity:.55;padding:0}
+  .bar.fina{height:14px;margin:6px 0} .bar.fina div{font-size:0;padding:0}
+  .nomes{display:flex;justify-content:space-between;font-size:13px;color:var(--mut)}
+  .nomes b{color:var(--ink)}
+  .big{font:700 40px/1 var(--mono);letter-spacing:-.03em}
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+  .kpi{border-top:1px solid var(--line);padding-top:8px}
+  .kpi .v{font:700 18px var(--mono)} .kpi .t{font-size:12px;color:var(--mut)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th,td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+  th{font:600 11px var(--mono);text-transform:uppercase;letter-spacing:.05em;color:var(--mut);cursor:pointer;user-select:none}
+  th:first-child,td:first-child{text-align:left}
+  td.num{font-family:var(--mono)}
+  .pill{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}
+  .mini{display:inline-block;width:70px;height:6px;background:var(--line);border-radius:3px;vertical-align:middle;margin-left:6px;overflow:hidden}
+  .mini i{display:block;height:100%;background:var(--mut)}
+  .definido{display:none;padding:22px 24px;border-radius:12px;margin-bottom:16px;color:#fff;text-align:center;animation:surge .5s ease-out}
+  .definido .t1{font:700 13px var(--mono);letter-spacing:.12em;text-transform:uppercase;opacity:.9}
+  .definido .t2{font-size:34px;font-weight:800;letter-spacing:-.02em;margin:6px 0 4px;line-height:1.1}
+  .definido .t3{font-size:14px;opacity:.92}
+  @keyframes surge{from{transform:scale(.97);opacity:0}to{transform:none;opacity:1}}
+  .aviso{padding:12px 14px;border-radius:8px;border:1px solid var(--warn);color:var(--warn);margin-bottom:14px;font-size:14px}
+  .erro{border-color:#c62828;color:#c62828}
+  svg text{fill:var(--mut);font:11px var(--mono)}
+  .gov{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+  .gov .card{padding:14px}
+  footer{margin-top:22px;color:var(--mut);font-size:12.5px}
+  .tabs{display:flex;gap:6px;margin:22px 0 10px}
+  .vant{margin:16px 0 4px;padding:16px 18px;border-radius:10px;color:#fff;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px}
+  .vant .r{font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;opacity:.9;width:100%}
+  .vant .n{font:800 38px/1.05 var(--mono);letter-spacing:-.03em}
+  .vant .q{font-size:15px;opacity:.95}
+  .ctl{display:none;align-items:center;flex-wrap:wrap;gap:8px 10px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13.5px}
+  .ctl .relogio{font:700 20px var(--mono);margin-right:6px}
+  .ctl button{font:600 13px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:6px 10px;border-radius:6px;cursor:pointer}
+  .ctl button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .ctl .sep{flex:1}
+  .ctl .prog{width:120px;height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+  .ctl .prog i{display:block;height:100%;background:var(--mut)}
+  .tabs button{font:600 13px system-ui;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:7px 12px;border-radius:6px;cursor:pointer}
+  .tabs button.on{border-color:var(--ink)}
+  .sec{display:none}.sec.on{display:block}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Apuração · 2º Turno 25/10/2026</h1>
+    <span id="modo" class="badge">…</span>
+    <span class="meta" id="meta">conectando…</span>
+  </header>
+  <div id="avisos"></div>
+  <div class="definido" id="definido"></div>
+  <div class="ctl" id="ctl">
+    <span class="relogio" id="relogio">17:00</span>
+    <span id="ordem" style="color:var(--mut)"></span>
+    <span class="sep"></span>
+    <span style="color:var(--mut)">Velocidade:</span>
+    <button data-a="pausar" id="bPausa">Pausar</button>
+    <button data-v="60">60×</button>
+    <button data-v="300">300×</button>
+    <button data-v="900">900×</button>
+    <button data-v="1800">1.800×</button>
+    <button data-v="3600">3.600×</button>
+    <button data-v="7200">7.200×</button>
+    <button data-a="reiniciar" title="Recomeçar do zero">↺ Reiniciar</button>
+  </div>
+
+  <div id="conteudo" style="display:none">
+    <div class="grid g2">
+      <div class="card">
+        <div class="lbl">Direção da eleição · Presidente</div>
+        <div class="tend" id="tend">—</div>
+        <div class="conf" id="conf"></div>
+        <div class="vant" id="vant" style="display:none"></div>
+        <div class="lbl" style="margin-top:20px">Resultado projetado ao final (% votos válidos)</div>
+        <div class="bar" id="barProj"></div>
+        <div class="nomes" id="mePrj"></div>
+        <div class="lbl" style="margin-top:18px">Apurado até agora</div>
+        <div class="bar fina" id="barAp"></div>
+        <div class="nomes" id="nomesAp"></div>
+      </div>
+      <div class="card">
+        <div class="lbl">Chance de vitória (modelo)</div>
+        <div style="display:flex;justify-content:space-between;align-items:end;gap:10px">
+          <div><div class="big" id="probA" style="color:var(--a)">–</div><div id="nA" class="t" style="font-size:13px"></div></div>
+          <div style="text-align:right"><div class="big" id="probB" style="color:var(--b)">–</div><div id="nB" class="t" style="font-size:13px"></div></div>
+        </div>
+        <div class="kpis">
+          <div class="kpi"><div class="v" id="kPst">–</div><div class="t">seções apuradas</div></div>
+          <div class="kpi"><div class="v" id="kFalta">–</div><div class="t">votos válidos a apurar (est.)</div></div>
+          <div class="kpi"><div class="v" id="kSwing">–</div><div class="t">variação vs 1º turno</div></div>
+        </div>
+        <div class="lbl" style="margin-top:18px">Evolução da noite</div>
+        <svg id="graf" viewBox="0 0 420 170" width="100%"></svg>
+        <div class="nomes" style="font-size:12px" id="leg"></div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button data-t="reg" class="on">Por região</button>
+      <button data-t="uf">Por estado</button>
+      <button data-t="gov">Governadores</button>
+    </div>
+    <div class="sec on card" id="s-reg"><table id="tReg"></table></div>
+    <div class="sec card" id="s-uf"><table id="tUf"></table></div>
+    <div class="sec" id="s-gov"><div class="gov" id="govs"></div></div>
+  </div>
+
+  <footer>
+    Fonte: arquivos oficiais de divulgação do TSE (resultados.tse.jus.br). A <b>projeção</b> e a
+    <b>chance de vitória</b> são estimativas estatísticas deste painel — não são resultado oficial.
+    Como funciona: em cada estado, os votos que ainda faltam são estimados pelo eleitorado das seções não
+    apuradas; o % de cada candidato nesses votos mistura o que já foi apurado no estado com o desempenho
+    no 1º turno ajustado pela variação observada no país. Isso corrige o efeito de estados que apuram mais
+    rápido que outros.
+  </footer>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const nf = new Intl.NumberFormat("pt-BR");
+const f2 = x => x==null||!isFinite(x) ? "–" : x.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
+const fi = x => x==null||!isFinite(x) ? "–" : nf.format(Math.round(x));
+const esc = s => String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const cap = s => String(s||"").toLowerCase().replace(/(^|\s)\S/g,m=>m.toUpperCase());
+let ultimo=null, ordUF={col:"uf",asc:true};
+
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("on",x===b));
+  document.querySelectorAll(".sec").forEach(s=>s.classList.toggle("on",s.id==="s-"+b.dataset.t));
+});
+
+function barra(el, pa, rotulos=true){
+  if(pa==null){el.innerHTML="";return;}
+  el.innerHTML=`<div class="a" style="width:${pa}%">${rotulos?f2(pa)+"%":""}</div><div class="b" style="width:${100-pa}%">${rotulos?f2(100-pa)+"%":""}</div><div class="meio"></div>`;
+}
+
+function render(d){
+  const av=[];
+  const modo={demo:["demo","Simulação (dados fictícios)"],"teste-1turno":["teste","Teste · 1º turno"],oficial:["oficial","Oficial · TSE"]}[d.modo]||["",d.modo||"…"];
+  $("modo").className="badge "+modo[0]; $("modo").textContent=modo[1];
+  $("meta").textContent=`atualizado ${d.atualizado||"–"} · eleição ${d.eleicao||"–"}`;
+  if(d.modo==="teste-1turno") av.push(["","Modo teste: dados do 1º turno (vários candidatos). Os % consideram só os dois primeiros colocados. Serve para conferir que o seu computador acessa o TSE."]);
+  if(d.status_erro) av.push(["erro","Última leitura com erro: "+esc(d.status_erro)+" — os números abaixo são da leitura anterior."]);
+  if(d.status!=="ok"){ av.push(["",esc(d.mensagem||"Aguardando dados…")]); $("avisos").innerHTML=av.map(a=>`<div class="aviso ${a[0]}">${a[1]}</div>`).join(""); return; }
+  $("avisos").innerHTML=av.map(a=>`<div class="aviso ${a[0]}">${a[1]}</div>`).join("");
+  $("conteudo").style.display="";
+
+  const p=d.presidente, [A,B]=p.candidatos, nome={[A.n]:cap(A.nome),[B.n]:cap(B.nome)};
+  const lider=nome[p.lider];
+  const prob=p.lider===A.n?p.prob_a:1-p.prob_a;
+  const df=$("definido");
+  if(p.definido){
+    const venc=p.definido, perd=venc===A.n?B.n:A.n;
+    const pv=venc===A.n?p.apurado.pct_a:100-p.apurado.pct_a;
+    const dif=Math.abs(p.apurado.a-p.apurado.b);
+    df.style.background = venc===A.n?"var(--a)":"var(--b)";
+    df.innerHTML=`<div class="t1">Matematicamente definido</div>
+      <div class="t2">${esc(nome[venc])} eleito presidente</div>
+      <div class="t3">${f2(p.pst_soma)}% das seções apuradas · ${f2(pv)}% dos votos válidos · vantagem de ${fi(dif)} votos${p.falta_votos>0?`, maior que todos os ~${fi(p.falta_votos)} votos que ainda faltam — ${esc(nome[perd])} não alcança mais`:" · apuração concluída"}.</div>`;
+    if(df.style.display!=="block"){ df.style.display="block"; if(!window._avisouDef){ window._avisouDef=1; document.title="✔ "+nome[venc]+" eleito · Apuração"; df.scrollIntoView({behavior:"smooth"}); } }
+    $("tend").textContent=`${nome[venc]} eleito (matematicamente)`;
+  } else { df.style.display="none"; }
+  if(p.definido){}
+  else if(p.confianca==="disputa aberta"){ $("tend").textContent=`Disputa aberta · ${lider} à frente`; }
+  else { $("tend").textContent=`${lider} deve vencer`; }
+  $("tend").style.color = p.lider===A.n?"var(--a)":"var(--b)";
+  $("conf").innerHTML=`Confiança: <b>${p.confianca}</b> · ${f2(p.pst_soma)}% das seções apuradas`+
+    (p.real_demo_a!=null?` · <i>resultado real da simulação: ${esc(A.nome)} ${f2(p.real_demo_a)}%</i>`:"");
+  if(!(p.apurado.a+p.apurado.b>0)){
+    $("tend").textContent="Apuração ainda não começou"; $("tend").style.color="var(--ink)";
+    $("conf").innerHTML=(d.modo==="demo"?"Simulação iniciando.":"Conexão com o TSE ok.")+" A barra abaixo é só a <b>base do 1º turno</b> (os dois finalistas), não é tendência do 2º turno. A apuração começa após as 17h de domingo.";
+  }
+  barra($("barProj"),p.projecao.pct_a);
+  $("mePrj").innerHTML=`<span><span class="pill" style="background:var(--a)"></span><b>${esc(nome[A.n])}</b> (${A.n})</span><span>margem ± ${f2(p.projecao.margem_erro_pp)} p.p.</span><span><b>${esc(nome[B.n])}</b> (${B.n})<span class="pill" style="background:var(--b);margin:0 0 0 6px"></span></span>`;
+  barra($("barAp"),p.apurado.pct_a,false);
+  $("nomesAp").innerHTML=`<span>${f2(p.apurado.pct_a)}% · ${fi(p.apurado.a)} votos</span><span>${fi(p.apurado.b)} votos · ${f2(p.apurado.pct_a==null?null:100-p.apurado.pct_a)}%</span>`;
+  const pct=x=>(p.definido||p.pst_soma>=100)?Math.round(100*x)+"%":x>0.99?">99%":x<0.01?"<1%":Math.round(100*x)+"%";
+  const semVotos=!(p.apurado.a+p.apurado.b>0);
+  const vt=$("vant");
+  if(semVotos){ vt.style.display="none"; }
+  else{
+    const lidAp = p.apurado.a>=p.apurado.b ? A : B, seg = lidAp===A?B:A;
+    const dv=Math.abs(p.apurado.a-p.apurado.b), dpp=Math.abs(2*p.apurado.pct_a-100);
+    vt.style.display="flex"; vt.style.background = lidAp===A?"var(--a)":"var(--b)";
+    vt.innerHTML=`<span class="r">Vantagem na apuração</span><span class="n">+${fi(dv)}</span>
+      <span class="q">votos de <b>${esc(nome[lidAp.n])}</b> sobre ${esc(nome[seg.n])} · ${f2(dpp)} p.p.</span>`;
+  }
+  const ctl=$("ctl");
+  if(d.demo){
+    ctl.style.display="flex";
+    $("relogio").textContent=d.demo.hora+(d.demo.pausado?" ⏸":"");
+    $("ordem").innerHTML=(d.demo.ordem==="real"
+      ? "ordem real do 1º turno (horário de chegada de cada seção)"
+      : "dados fictícios · Sul/Sudeste apuram primeiro, Norte/Nordeste depois")+` · <span class="prog" style="display:inline-block;vertical-align:middle"><i style="width:${d.demo.pct_tempo}%"></i></span>`;
+    $("bPausa").textContent = d.demo.pausado ? "▶ Continuar" : "Pausar";
+    ctl.querySelectorAll("button").forEach(b=>{
+      const on = b.dataset.a==="pausar" ? d.demo.pausado : (!d.demo.pausado && Number(b.dataset.v)===Math.round(d.demo.vel));
+      b.classList.toggle("on",!!on);
+    });
+  } else ctl.style.display="none";
+  $("probA").textContent=semVotos?"–":pct(p.prob_a); $("probB").textContent=semVotos?"–":pct(1-p.prob_a);
+  $("nA").textContent=nome[A.n]; $("nB").textContent=nome[B.n];
+  $("kPst").textContent=f2(p.pst_soma)+"%"; $("kFalta").textContent=fi(p.falta_votos);
+  $("kSwing").textContent=(p.swing_pp>0?"+":"")+f2(p.swing_pp)+" p.p."; $("kSwing").title=`variação média de ${nome[A.n]} (só A×B) em relação ao 1º turno, nas urnas já apuradas`;
+
+  // regiões
+  $("tReg").innerHTML=`<tr><th>Região</th><th>Apurado</th><th>${esc(nome[A.n])} apurado</th><th>${esc(nome[A.n])} projetado</th><th>Peso no total</th></tr>`+
+    p.regioes.map(r=>`<tr><td>${r.regiao}</td><td class="num">${f2(r.pst)}%<span class="mini"><i style="width:${r.pst}%"></i></span></td><td class="num">${f2(r.pct_a)}%</td><td class="num" style="color:${r.proj_a>=50?"var(--a)":"var(--b)"}">${f2(r.proj_a)}%</td><td class="num">${f2(r.peso)}%</td></tr>`).join("");
+  // UFs
+  const cols=[["uf","UF"],["regiao","Região"],["pst","Apurado"],["pct_a",nome[A.n]+" apurado"],["proj_a",nome[A.n]+" projetado"],["base_a","1º turno (A×B)"],["falta","Votos a apurar"]];
+  const ufs=[...p.ufs].sort((x,y)=>{const a=x[ordUF.col]??-1,b=y[ordUF.col]??-1;return (a>b?1:a<b?-1:0)*(ordUF.asc?1:-1)});
+  $("tUf").innerHTML="<tr>"+cols.map(c=>`<th data-c="${c[0]}">${esc(c[1])}${ordUF.col===c[0]?(ordUF.asc?" ▲":" ▼"):""}</th>`).join("")+"</tr>"+
+    ufs.map(u=>`<tr><td><b>${u.uf.toUpperCase()}</b> <span style="color:var(--mut)">${esc(u.nome)}</span></td><td>${u.regiao}</td><td class="num">${f2(u.pst)}%</td><td class="num">${f2(u.pct_a)}%</td><td class="num" style="color:${u.proj_a>=50?"var(--a)":"var(--b)"}">${f2(u.proj_a)}%</td><td class="num">${f2(u.base_a)}%</td><td class="num">${fi(u.falta)}</td></tr>`).join("");
+  $("tUf").querySelectorAll("th").forEach(th=>th.onclick=()=>{const c=th.dataset.c;ordUF={col:c,asc:ordUF.col===c?!ordUF.asc:c==="uf"||c==="regiao"};render(ultimo)});
+
+  // governadores
+  const g=d.governadores||[];
+  $("govs").innerHTML=g.length?g.map(x=>{const[a,b]=x.candidatos;const lid=x.lider===a.n?a:b;const pr=x.lider===a.n?x.prob_a:1-x.prob_a;
+    return `<div class="card"><div class="lbl">${esc(x.nome_uf)} · ${f2(x.pst_soma)}% apurado</div>
+    <div style="font-weight:700;font-size:17px">${x.definido?"Eleito: ":""}${esc(cap(lid.nome))}</div>
+    <div style="font-size:13px;color:var(--mut)">confiança ${x.confianca} · chance ${Math.round(100*pr)}%</div>
+    <div class="bar" style="height:24px"><div class="a" style="width:${x.projecao.pct_a}%;font-size:12px">${f2(x.projecao.pct_a)}%</div><div class="b" style="width:${100-x.projecao.pct_a}%;font-size:12px">${f2(100-x.projecao.pct_a)}%</div><div class="meio"></div></div>
+    <div class="nomes"><span>${esc(cap(a.nome))}</span><span>${esc(cap(b.nome))}</span></div>
+    <div style="font-size:12px;color:var(--mut);margin-top:4px">apurado: ${f2(x.apurado.pct_a)}% × ${f2(x.apurado.pct_a==null?null:100-x.apurado.pct_a)}%</div></div>`}).join("")
+    :`<div class="card" style="color:var(--mut)">Sem dados de governador ainda (AC, AM, DF, ES, RJ, RN e TO têm 2º turno).</div>`;
+
+  $("leg").innerHTML=`<span><span class="pill" style="background:var(--a)"></span>${esc(nome[A.n])} &nbsp;<span class="pill" style="background:var(--b)"></span>${esc(nome[B.n])}</span><span>% apurado ao longo da noite</span>`;
+  grafico(d.historico||[]);
+}
+
+function grafico(h){
+  h=h.filter(e=>e.pst>0);
+  const W=420,H=170,L=34,R=8,T=8,Bm=22,s=$("graf");
+  if(!h.length){s.innerHTML=`<text x="${W/2}" y="${H/2}" text-anchor="middle">aguardando pontos…</text>`;return;}
+  h=h.map(e=>({...e,apurado_b:e.apurado_a==null?null:100-e.apurado_a,proj_b:e.proj_a==null?null:100-e.proj_a}));
+  const v=h.flatMap(e=>[e.apurado_a,e.apurado_b]).filter(x=>x!=null);
+  let lo=Math.floor(Math.min(...v,50)-2), hi=Math.ceil(Math.max(...v,50)+2);
+  const X=p=>L+p/100*(W-L-R), Y=x=>T+(1-(x-lo)/(hi-lo))*(H-T-Bm);
+  let o="";
+  const passo=hi-lo>12?5:2;
+  for(let y=Math.ceil(lo/passo)*passo;y<=hi;y+=passo) o+=`<line x1="${L}" x2="${W-R}" y1="${Y(y)}" y2="${Y(y)}" stroke="currentColor" opacity="${y===50?.5:.12}"/><text x="${L-4}" y="${Y(y)+4}" text-anchor="end">${y}</text>`;
+  for(let p=0;p<=100;p+=25) o+=`<text x="${X(p)}" y="${H-6}" text-anchor="middle">${p}%</text>`;
+  const linha=(k,dash,cor)=>`<polyline fill="none" stroke="${cor}" stroke-width="2" ${dash?'stroke-dasharray="5 4"':""} points="${h.filter(e=>e[k]!=null).map(e=>X(e.pst)+","+Y(e[k])).join(" ")}"/>`;
+  s.innerHTML=`<g style="color:var(--mut)">${o}</g>`+linha("apurado_a",false,"var(--a)")+linha("apurado_b",false,"var(--b)");
+}
+
+async function atualizar(){
+  try{ const r=await fetch("/api/estado",{cache:"no-store"}); ultimo=await r.json(); render(ultimo); }
+  catch(e){ $("meta").textContent="sem conexão com o servidor local (o servidor.py está rodando?)"; }
+}
+document.querySelectorAll("#ctl button").forEach(b=>b.onclick=async()=>{
+  const q = b.dataset.a ? (b.dataset.a==="pausar" && ultimo?.demo?.pausado ? "acao=continuar" : "acao="+b.dataset.a) : "vel="+b.dataset.v;
+  await fetch("/api/controle?"+q,{cache:"no-store"}); setTimeout(atualizar,400);
+});
+atualizar(); setInterval(atualizar,1000);
+</script>
+</body>
+</html>
