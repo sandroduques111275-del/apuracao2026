@@ -44,7 +44,7 @@ GOVERNADOR = {"cargo": 3, "ele1t": "6259", "ele2t": "6260",
 
 # Ordem dos candidatos no painel (número de urna). Cores neutras.
 CANDIDATOS_PRES = ["22", "13"]  # 1º = Flávio (azul), 2º = Lula (vermelho)
-INTERVALO_SEG = 45          # intervalo entre leituras do TSE
+INTERVALO_SEG = 15          # intervalo entre leituras do TSE (segundos)
 INTERVALO_FINAL_SEG = 300   # depois de 100% apurado
 ESPERA_404_SEG = 120        # quando o TSE ainda não publicou o arquivo
 
@@ -799,7 +799,7 @@ class Coletor(threading.Thread):
                 self.acordar.wait(espera)
                 self.acordar.clear()
             else:
-                time.sleep(espera + random.uniform(0, 5))
+                time.sleep(espera + random.uniform(0, 2))
 
 
 # --------------------------------------------------------------------------
