@@ -821,6 +821,22 @@ class Coletor(threading.Thread):
 # --------------------------------------------------------------------------
 # Servidor web local
 # --------------------------------------------------------------------------
+# ---- quantas pessoas estão com o painel aberto agora ----
+_vistos, _vistos_lock, _pico = {}, threading.Lock(), [0]
+JANELA_ONLINE = 30  # segundos sem atualizar = saiu
+
+
+def contar_online(vid):
+    agora = time.time()
+    with _vistos_lock:
+        _vistos[vid] = agora
+        for k in [k for k, t in _vistos.items() if agora - t > JANELA_ONLINE]:
+            del _vistos[k]
+        n = len(_vistos)
+        _pico[0] = max(_pico[0], n)
+        return n, _pico[0]
+
+
 def criar_handler(coletor):
     class H(BaseHTTPRequestHandler):
         def log_message(self, *a):
@@ -837,8 +853,13 @@ def criar_handler(coletor):
 
         def do_GET(self):
             if self.path.startswith("/api/estado"):
+                from urllib.parse import urlparse, parse_qs
+                vid = (parse_qs(urlparse(self.path).query).get("v", [""])[0] or "")[:40]
+                online, pico = contar_online(vid or self.client_address[0])
                 with coletor.lock:
-                    self.enviar(json.dumps(coletor.estado, ensure_ascii=False), "application/json; charset=utf-8")
+                    r = dict(coletor.estado)
+                r["online"], r["pico"] = online, pico
+                self.enviar(json.dumps(r, ensure_ascii=False), "application/json; charset=utf-8")
             elif self.path.startswith("/api/controle"):
                 from urllib.parse import urlparse, parse_qs
                 q = parse_qs(urlparse(self.path).query)

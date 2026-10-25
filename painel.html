@@ -85,6 +85,7 @@
     <h1>Apuração · 2º Turno 25/10/2026</h1>
     <span id="modo" class="badge">…</span>
     <span class="meta" id="meta">conectando…</span>
+    <span class="badge" id="online" title="pessoas com o painel aberto agora e o pico desde que o servidor ligou">👥 –</span>
   </header>
   <div id="avisos"></div>
   <div class="definido" id="definido"></div>
@@ -169,6 +170,7 @@ function render(d){
   const av=[];
   const modo={demo:["demo","Simulação (dados fictícios)"],"teste-1turno":["teste","Teste · 1º turno"],oficial:["oficial","Oficial · TSE"]}[d.modo]||["",d.modo||"…"];
   $("modo").className="badge "+modo[0]; $("modo").textContent=modo[1];
+  if(d.online!=null) $("online").textContent=`👥 ${d.online} online · pico ${d.pico}`;
   $("meta").textContent=`atualizado ${d.atualizado||"–"} · eleição ${d.eleicao||"–"}`;
   if(d.modo==="teste-1turno") av.push(["","Modo teste: dados do 1º turno (vários candidatos). Os % consideram só os dois primeiros colocados. Serve para conferir que o seu computador acessa o TSE."]);
   if(d.status_erro) av.push(["erro","Última leitura com erro: "+esc(d.status_erro)+" — os números abaixo são da leitura anterior."]);
@@ -271,8 +273,9 @@ function grafico(h){
   s.innerHTML=`<g style="color:var(--mut)">${o}</g>`+linha("apurado_a",false,"var(--a)")+linha("apurado_b",false,"var(--b)");
 }
 
+let VID; try{ VID=localStorage.getItem("vid"); if(!VID){ VID=Math.random().toString(36).slice(2,12); localStorage.setItem("vid",VID);} }catch(e){ VID=Math.random().toString(36).slice(2,12); }
 async function atualizar(){
-  try{ const r=await fetch("/api/estado",{cache:"no-store"}); ultimo=await r.json(); render(ultimo); }
+  try{ const r=await fetch("/api/estado?v="+VID,{cache:"no-store"}); ultimo=await r.json(); render(ultimo); }
   catch(e){ $("meta").textContent="sem conexão com o servidor local (o servidor.py está rodando?)"; }
 }
 $("btnSim").onclick=async()=>{
