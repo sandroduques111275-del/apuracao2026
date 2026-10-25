@@ -660,6 +660,22 @@ class Coletor(threading.Thread):
         pres["oficial_br"] = {"pst": u_br["pst"], "hora": u_br["ht"], "data": u_br["dt"],
                               "votos": {n: c["votos"] for n, c in u_br["cands"].items()},
                               "vv": u_br["vv"], "and": u_br["and"]}
+        # O total NACIONAL exibido vem do arquivo do Brasil (o mesmo do app do TSE).
+        # Os arquivos dos estados às vezes chegam atrasados na CDN do TSE; eles seguem
+        # sendo usados só para a projeção e as tabelas por estado/região.
+        A, B = par
+        a_br = u_br["cands"].get(A, {}).get("votos", 0)
+        b_br = u_br["cands"].get(B, {}).get("votos", 0)
+        if a_br + b_br >= pres["apurado"]["a"] + pres["apurado"]["b"]:
+            pres["apurado"] = {"a": a_br, "b": b_br,
+                               "pct_a": round(100 * a_br / (a_br + b_br), 2) if a_br + b_br else None}
+            pres["pst_soma"] = round(u_br["pst"], 2)
+            if pres["definido"] and abs(a_br - b_br) <= pres["falta_votos"] * 1.10:
+                pres["definido"] = None
+            if not pres["definido"] and a_br + b_br > 0 and abs(a_br - b_br) > pres["falta_votos"] * 1.10 \
+                    and u_br["pst"] >= 50:
+                pres["definido"] = A if a_br > b_br else B
+                pres["confianca"] = "matematicamente definido"
         govs = []
         primeira = True
         for uf in GOVERNADOR["ufs"]:
@@ -755,7 +771,7 @@ class Coletor(threading.Thread):
                 r = self.ciclo_demo() if self.demo else self.ciclo_real()
                 r["modo"] = ("demo" if self.demo else "teste-1turno" if self.args.teste_1turno else "oficial")
                 r["eleicao"] = "simulação" if self.demo else self.ele_pres
-                r["atualizado"] = time.strftime("%H:%M:%S")
+                r["atualizado"] = time.strftime("%H:%M:%S", time.gmtime(time.time() - 3 * 3600))  # Brasília
                 r["requisicoes"] = self.cli.requisicoes
                 with self.lock:
                     hist = self.estado.get("historico", [])
