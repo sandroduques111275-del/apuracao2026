@@ -44,6 +44,7 @@ GOVERNADOR = {"cargo": 3, "ele1t": "6259", "ele2t": "6260",
 
 # Ordem dos candidatos no painel (número de urna). Cores neutras.
 CANDIDATOS_PRES = ["22", "13"]  # 1º = Flávio (azul), 2º = Lula (vermelho)
+PROJECAO_SO_1TURNO = True  # votos que faltam = resultado do 1º turno de cada estado
 INTERVALO_SEG = 15          # intervalo entre leituras do TSE (segundos)
 INTERVALO_FINAL_SEG = 300   # depois de 100% apurado
 ESPERA_404_SEG = 120        # quando o TSE ainda não publicou o arquivo
@@ -212,9 +213,15 @@ def projetar(unidades, prior, par):
             taxa = 0.74
         falta = 0.0 if frac >= 0.99999 else resta_el * taxa
         share_ap = a / (a + b) if a + b > 0 else None
-        base = min(0.99, max(0.01, base_a(uf) + swing))
-        w = math.sqrt(frac) if share_ap is not None else 0.0
-        s_resto = w * share_ap + (1 - w) * base if share_ap is not None else base
+        if PROJECAO_SO_1TURNO and uf in prior:
+            # votos que faltam no estado seguem o resultado do 1º turno DAQUELE estado (A×B)
+            base = min(0.99, max(0.01, base_a(uf)))
+            w = 0.0
+            s_resto = base
+        else:
+            base = min(0.99, max(0.01, base_a(uf) + swing))
+            w = math.sqrt(frac) if share_ap is not None else 0.0
+            s_resto = w * share_ap + (1 - w) * base if share_ap is not None else base
         s_resto = min(0.99, max(0.01, s_resto))
         pa, pb = a + falta * s_resto, b + falta * (1 - s_resto)
         # incerteza do % dos votos que faltam
@@ -291,7 +298,7 @@ def projetar(unidades, prior, par):
         "falta_votos": round(tot["falta"]),
         "pst_soma": round(100 * tot["st"] / tot["ts"], 2) if tot["ts"] else 0,
         "prob_a": round(prob_a, 4), "lider": lider, "confianca": confianca,
-        "definido": definido, "swing_pp": round(100 * swing, 2),
+        "definido": definido, "swing_pp": round(100 * swing, 2), "base_ufs": len(prior),
         "ufs": sorted(linhas, key=lambda x: x["uf"]), "regioes": regioes,
     }
 

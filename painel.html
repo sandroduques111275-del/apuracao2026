@@ -174,6 +174,8 @@ function render(d){
   $("meta").textContent=`atualizado ${d.atualizado||"–"} · eleição ${d.eleicao||"–"}`;
   if(d.modo==="teste-1turno") av.push(["","Modo teste: dados do 1º turno (vários candidatos). Os % consideram só os dois primeiros colocados. Serve para conferir que o seu computador acessa o TSE."]);
   if(d.status_erro) av.push(["erro","Última leitura com erro: "+esc(d.status_erro)+" — os números abaixo são da leitura anterior."]);
+  if(d.status==="ok" && d.modo==="oficial" && d.presidente && d.presidente.base_ufs<27)
+    av.push(["erro","Atenção: a base do 1º turno carregou só para "+d.presidente.base_ufs+" de 28 unidades — a projeção fica menos confiável."]);
   if(d.status!=="ok"){ av.push(["",esc(d.mensagem||"Aguardando dados…")]); $("avisos").innerHTML=av.map(a=>`<div class="aviso ${a[0]}">${a[1]}</div>`).join(""); return; }
   $("avisos").innerHTML=av.map(a=>`<div class="aviso ${a[0]}">${a[1]}</div>`).join("");
   $("conteudo").style.display="";
